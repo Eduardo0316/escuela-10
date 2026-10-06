@@ -2,6 +2,8 @@ package com.eduardo.escuela.entities;
 
 import java.time.LocalDate;
 
+import com.eduardo.escuela.exceptions.DatoInvalidoException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -46,4 +49,24 @@ public class Inscripcion {
 
     @Column(name = "FECHA_INSCRIPCION")
     private LocalDate fechaInscripcion;
+
+    public static Inscripcion crear(){
+        return Inscripcion.builder()
+                .fechaInscripcion(LocalDate.now())
+                .build();
+    }
+
+    public void asignarGrupo(Grupo grupo){
+        if(grupo == null)
+            throw new DatoInvalidoException("El grupo es requerido");
+
+        this.grupo = grupo;
+    }
+
+    public void asignarAlumno(Alumno alumno){
+        if(alumno == null)
+            throw new DatoInvalidoException("El alumno es requerido");
+        
+        this.alumno = alumno;
+    }
 }

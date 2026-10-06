@@ -44,6 +44,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn("Conflicto: {}", e.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
     }
+    
+    // 409: Relacion encontrada: (relacion existente entre registros)
+    @ExceptionHandler(EntidadRelacionadaException.class)
+    public ProblemDetail handleEntidadRelacionada(EntidadRelacionadaException e) {
+        log.warn("Relación encontrada: {}", e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
 
     // 409: la base de datos rechazó el dato (unique, foreign key...)
     @ExceptionHandler(DataIntegrityViolationException.class)

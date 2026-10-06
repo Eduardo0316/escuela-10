@@ -19,7 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity 
-@Table(name = "MAESTRO")
+@Table(name = "MAESTROS")
 @AllArgsConstructor 
 @NoArgsConstructor 
 @Getter @Builder  
@@ -41,7 +41,7 @@ public class Maestro {
     @Column(name = "EMAIL", nullable = false, length = 100, unique = true)
     private String email;
     
-    @Column(name = "TELEFONO", nullable = false, length = 100, unique = true)
+    @Column(name = "TELEFONO", nullable = false, length = 10, unique = true)
     private String telefono;
 
     @Builder.Default
