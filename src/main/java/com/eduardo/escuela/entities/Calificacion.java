@@ -37,8 +37,9 @@ public class Calificacion {
     @Column(name = "CALIFICACION", nullable = false)
     private BigDecimal calificacion;
 
+    @Builder.Default 
     @Column(name = "FECHA_REGISTRO")
-    private LocalDate fechaRegistro;
+    private LocalDate fechaRegistro = LocalDate.now();
 
     public static Calificacion crear(BigDecimal calificacion){
         validarDatos(calificacion);

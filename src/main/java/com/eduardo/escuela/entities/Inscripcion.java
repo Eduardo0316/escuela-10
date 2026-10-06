@@ -1,5 +1,6 @@
 package com.eduardo.escuela.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.eduardo.escuela.exceptions.DatoInvalidoException;
@@ -47,8 +48,12 @@ public class Inscripcion {
     @JoinColumn(name = "ID_GRUPO", nullable = false)
     private Grupo grupo;
 
+    @Builder.Default
     @Column(name = "FECHA_INSCRIPCION")
-    private LocalDate fechaInscripcion;
+    private LocalDate fechaInscripcion = LocalDate.now();
+
+    @OneToOne(mappedBy = "inscripcion")
+    private Calificacion calificacion;
 
     public static Inscripcion crear(){
         return Inscripcion.builder()
