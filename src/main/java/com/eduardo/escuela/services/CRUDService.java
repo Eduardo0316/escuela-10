@@ -2,10 +2,11 @@ package com.eduardo.escuela.services;
 
 import java.util.List;
 
-public interface CRUDService <RQ, RS> {
+public interface CRUDService<RQ, RS>{
+
     List<RS> listar();
 
-    RS obtenerPorID(Long id);
+    RS obtenerPorId(Long id);
 
     RS registrar(RQ request);
 

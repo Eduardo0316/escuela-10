@@ -1,14 +1,21 @@
 package com.eduardo.escuela.entities;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import com.eduardo.escuela.utils.StringCustomUtils;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,10 +49,15 @@ public class Alumno {
     @Column(name = "MATRICULA", nullable = false, length = 10, unique = true)
     private String matricula;
 
+    @Builder.Default
     @Column(name = "FECHA_INGRESO")
-    private LocalDate fechaIngreso;
+    private LocalDate fechaIngreso = LocalDate.now();
 
-    public static void validarDatos(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String matricula) {
+    @Builder.Default
+    @OneToMany(mappedBy = "alumno", fetch = FetchType.LAZY)
+    private List<Inscripcion> inscripciones = new ArrayList<>();
+
+    private static void validarDatos(String nombre, String apellidoPaterno, String apellidoMaterno) {
         StringCustomUtils.validarTamanio(nombre, 1, 50, 
             "El nombre es requerido y debe tener entre 1 y 50 caracteres");
         
@@ -54,34 +66,61 @@ public class Alumno {
         
         StringCustomUtils.validarTamanio(apellidoMaterno, 1, 50, 
             "El apellido materno es requerido y debe tener entre 1 y 50 caracteres");
-        
+    }
+
+    //Funcion para verificar si hay cambio en datos de la persona
+    public boolean cambioEnDatos(String nombre, String apellidoPaterno, String apellidoMaterno){
+        validarDatos(nombre, apellidoPaterno, apellidoMaterno);
+
+        return !this.nombre.equals(nombre) ||
+            !this.apellidoPaterno.equals(apellidoPaterno) ||
+            !this.apellidoMaterno.equals(apellidoMaterno);
+    }
+
+    public void asignarDatosAcademicos(String email, String matricula){
         StringCustomUtils.validarTamanio(email, 1, 100, 
             "El email es requerido y debe tener entre 1 y 100 caracteres");
         
-        StringCustomUtils.validarTamanio(matricula, 1, 100, 
-            "La matricula es requerida y debe tener entre 1 y 10 caracteres");
+        StringCustomUtils.validarTamanio(matricula, 10, 10, 
+            "La matricula es requerida y debe tener exactamente 10 caracteres");
+
+        this.email = email.toLowerCase().trim();
+        this.matricula = matricula.trim();
     }
     
     public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String matricula) {
-        validarDatos(nombre, apellidoPaterno, apellidoMaterno, email, matricula);
-
-        this.nombre = nombre;
-        this.apellidoPaterno = apellidoPaterno;
-        this.apellidoMaterno = apellidoMaterno;
-        this.email = email;
-        this.matricula = matricula;
+        asignarDatosAcademicos(email, matricula);
+    
+        this.nombre = nombre.trim();
+        this.apellidoPaterno = apellidoPaterno.trim();
+        this.apellidoMaterno = apellidoMaterno.trim();
     }
 
-    public static Alumno crear(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String matricula){
-        validarDatos(nombre, apellidoPaterno, apellidoMaterno, email, matricula);
+    public static Alumno crear(String nombre, String apellidoPaterno, String apellidoMaterno){
+        validarDatos(nombre, apellidoPaterno, apellidoMaterno);
 
         return Alumno.builder()
             .nombre(nombre.trim())
             .apellidoPaterno(apellidoPaterno.trim())
             .apellidoMaterno(apellidoMaterno.trim())
-            .email(email.toLowerCase())
-            .matricula(matricula)
-            .fechaIngreso(LocalDate.now())
             .build();
+    }
+
+    public BigDecimal calcularPromedio(){
+        List<BigDecimal> calificaciones = inscripciones.stream()
+            .map(Inscripcion::getCalificacion)
+            .filter(Objects::nonNull)
+            .map(Calificacion::getCalificacion)
+            .filter(Objects::nonNull)
+            .toList();
+
+        if(calificaciones.isEmpty()) return BigDecimal.ZERO;
+
+        BigDecimal suma = calificaciones.stream()
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return suma.divide(
+            BigDecimal.valueOf(calificaciones.size()), 
+            RoundingMode.HALF_UP);
     }
 }
