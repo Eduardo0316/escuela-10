@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController 
 @RequestMapping("/api/curso")
-@Tag(name = "API curso", description = "Métodos para gestion de cursos")
+@Tag(name = "API Cursos", description = "Métodos para gestion de cursos")
 public class CursoController extends CRUDController<CursoRequest, CursoResponse, CursoService> {
     public CursoController(CursoService service){
         super(service);
