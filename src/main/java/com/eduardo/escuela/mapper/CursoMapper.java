@@ -7,10 +7,7 @@ import com.eduardo.escuela.dto.cursos.CursoResponse;
 import com.eduardo.escuela.dto.datos.DatosCurso;
 import com.eduardo.escuela.entities.Curso;
 
-import lombok.RequiredArgsConstructor;
-
-@Component 
-@RequiredArgsConstructor 
+@Component  
 public class CursoMapper implements CommonMapper<CursoRequest, CursoResponse, Curso>{
 
     @Override

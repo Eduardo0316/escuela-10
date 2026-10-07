@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Datis necesarios para registrar o actualizar un alumno")
+@Schema(description = "Datos necesarios para registrar o actualizar un alumno")
 public record AlumnoRequest(
     @Schema(description = "Nombre del alumno", example = "Eduardo")
     @NotBlank(message = "El nombre es requerido")

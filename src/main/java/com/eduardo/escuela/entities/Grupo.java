@@ -1,6 +1,10 @@
 package com.eduardo.escuela.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.eduardo.escuela.exceptions.DatoInvalidoException;
+import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
 import com.eduardo.escuela.utils.StringCustomUtils;
 
 import jakarta.persistence.Column;
@@ -11,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -52,37 +57,38 @@ public class Grupo {
     @Column(name = "PERIODO", length = 20, nullable = false)
     private String periodo;
 
-    private static void validarDatos(String periodo){
-        StringCustomUtils.validarTamanio(periodo, 10, 20,
-        "El periodo es requerido y debe tener entre 10 y 20 caracteres"
-        );
-    }
+    @OneToMany(mappedBy = "grupo")
+    @Builder.Default
+    private List<Horario> horarios = new ArrayList<>();
 
-    public static Grupo crear(String periodo){
-        validarDatos(periodo);
+    public static Grupo crear(Curso curso, Maestro maestro, Aula aula, String periodo) {
+        validarRelaciones(curso, maestro, aula);
+        validarPeriodo(periodo);
         return Grupo.builder()
+                .curso(curso)
+                .maestro(maestro)
+                .aula(aula)
                 .periodo(periodo)
                 .build();
     }
 
-    public void asignarMaestro(Maestro maestro){
-        if (maestro == null)
-            throw new DatoInvalidoException("El maestro es requerido");
-
-        this.maestro = maestro;
-    }
-
-    public void asignarAula(Aula aula){
-        if (aula == null)
-            throw new DatoInvalidoException("El aula es requerida");
-
-        this.aula = aula;
-    }
-
-    public void asignarCurso(Curso curso){
-        if (curso == null)
-            throw new DatoInvalidoException("El curso es requerido");
-
+    public void actualizar(Curso curso, Maestro maestro, Aula aula, String periodo) {
+        validarRelaciones(curso, maestro, aula);
+        validarPeriodo(periodo);
         this.curso = curso;
+        this.maestro = maestro;
+        this.aula = aula;
+        this.periodo = periodo;
+    }
+
+    private static void validarPeriodo(String periodo) {
+        StringCustomUtils.validarTamanio(periodo, 1, 20,
+            "El periodo es requerido y debe tener entre 1 y 20 caracteres");
+    }
+
+    private static void validarRelaciones(Curso curso, Maestro maestro, Aula aula) {
+        if (curso == null || maestro == null || aula == null) {
+            throw new RecursoNoEncontradoException("El curso, el maestro y el aula son requeridos");
+        }
     }
 }
