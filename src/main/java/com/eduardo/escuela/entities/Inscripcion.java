@@ -1,9 +1,9 @@
 package com.eduardo.escuela.entities;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.eduardo.escuela.exceptions.DatoInvalidoException;
+import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,31 +47,31 @@ public class Inscripcion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_GRUPO", nullable = false)
     private Grupo grupo;
+    
+    @Builder.Default
+    @OneToOne(mappedBy = "inscripcion")
+    private Calificacion calificacion = null;
 
     @Builder.Default
     @Column(name = "FECHA_INSCRIPCION")
     private LocalDate fechaInscripcion = LocalDate.now();
 
-    @OneToOne(mappedBy = "inscripcion")
-    private Calificacion calificacion;
-
-    public static Inscripcion crear(){
+    public static Inscripcion crear(Alumno alumno, Grupo grupo){
+        validarRelaciones(alumno, grupo);
         return Inscripcion.builder()
-                .fechaInscripcion(LocalDate.now())
+                .alumno(alumno)
+                .grupo(grupo)
                 .build();
     }
 
-    public void asignarGrupo(Grupo grupo){
-        if(grupo == null)
-            throw new DatoInvalidoException("El grupo es requerido");
-
+    public void actualizar(Alumno alumno, Grupo grupo){
+        validarRelaciones(alumno, grupo);
+        this.alumno = alumno;
         this.grupo = grupo;
     }
 
-    public void asignarAlumno(Alumno alumno){
-        if(alumno == null)
-            throw new DatoInvalidoException("El alumno es requerido");
-        
-        this.alumno = alumno;
+    private static void validarRelaciones(Alumno alumno, Grupo grupo){
+        if(alumno == null || grupo == null)
+            throw new RecursoNoEncontradoException("El curso, el maestro y el aula son requeridos");
     }
 }

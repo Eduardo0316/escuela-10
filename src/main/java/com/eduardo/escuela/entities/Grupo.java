@@ -3,7 +3,6 @@ package com.eduardo.escuela.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eduardo.escuela.exceptions.DatoInvalidoException;
 import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
 import com.eduardo.escuela.utils.StringCustomUtils;
 
