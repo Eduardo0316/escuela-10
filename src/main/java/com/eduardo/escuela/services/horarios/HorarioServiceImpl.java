@@ -7,6 +7,7 @@ import com.eduardo.escuela.utils.ServiceUtils;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eduardo.escuela.dto.horarios.HorarioRequest;
 import com.eduardo.escuela.dto.horarios.HorarioResponse;
@@ -16,8 +17,6 @@ import com.eduardo.escuela.enums.DiaSemana;
 import com.eduardo.escuela.exceptions.ConflictoException;
 import com.eduardo.escuela.repositories.GrupoRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,6 +62,7 @@ public class HorarioServiceImpl implements HorarioService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<HorarioResponse> listar() {
         return horarioRepository.findAll().stream()
             .map(horarioMapper::entidadAResponse)
@@ -70,6 +70,7 @@ public class HorarioServiceImpl implements HorarioService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public HorarioResponse obtenerPorId(Long id) {
         return horarioMapper.entidadAResponse(obtenerHorario(id));
     }

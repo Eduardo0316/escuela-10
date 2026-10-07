@@ -65,6 +65,7 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CursoResponse> listar() {
         log.info("Listando aulas");
 
@@ -74,6 +75,7 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CursoResponse obtenerPorId(Long id) {
         return cursoMapper.entidadAResponse(obtenerCurso(id));
     }

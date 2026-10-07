@@ -72,6 +72,7 @@ public class AulasServiceImpl implements AulasService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AulaResponse obtenerPorId(Long id) {
         return aulaMapper.entidadAResponse(obtenerAula(id));
     }
