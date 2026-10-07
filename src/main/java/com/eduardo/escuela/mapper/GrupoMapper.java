@@ -1,12 +1,13 @@
 package com.eduardo.escuela.mapper;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
-import com.eduardo.escuela.dto.datos.DatosGrupo;
+import com.eduardo.escuela.dto.grupo.GrupoRequest;
 import com.eduardo.escuela.dto.grupo.GrupoResponse;
+import com.eduardo.escuela.entities.Aula;
+import com.eduardo.escuela.entities.Curso;
 import com.eduardo.escuela.entities.Grupo;
+import com.eduardo.escuela.entities.Maestro;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,8 +27,15 @@ public class GrupoMapper {
             cursoMapper.entidadADatosCurso(grupo.getCurso()),
             maestroMapper.entidadADatosMaestro(grupo.getMaestro()),
             aulaMapper.entidadADatosAula(grupo.getAula()),
-            grupo.getHorarios().stream().map(horarioMapper::entidadADatosHorario).toList(),
+            grupo.getHorarios().stream().
+                map(horarioMapper::entidadADatosHorario).toList(),
             grupo.getPeriodo()
         );
+    }
+
+    public Grupo requestAEntidad(GrupoRequest request, Curso curso, Maestro maestro, Aula aula){
+        return request == null
+            ? null
+            : Grupo.crear(curso, maestro, aula, request.periodo());
     }
 }
