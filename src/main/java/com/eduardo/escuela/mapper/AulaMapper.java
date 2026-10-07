@@ -4,12 +4,10 @@ import org.springframework.stereotype.Component;
 
 import com.eduardo.escuela.dto.aulas.AulaRequest;
 import com.eduardo.escuela.dto.aulas.AulaResponse;
+import com.eduardo.escuela.dto.datos.DatosAula;
 import com.eduardo.escuela.entities.Aula;
 
-import lombok.RequiredArgsConstructor;
-
 @Component 
-@RequiredArgsConstructor 
 public class AulaMapper implements CommonMapper<AulaRequest, AulaResponse, Aula>{
 
     @Override
@@ -27,4 +25,11 @@ public class AulaMapper implements CommonMapper<AulaRequest, AulaResponse, Aula>
             request.capacidad());
     }
     
+    public DatosAula entidadADatosAula(Aula entidad){
+        return entidad == null
+            ? null
+            : new DatosAula(
+                entidad.getNombre(), 
+                entidad.getCapacidad());
+    }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.eduardo.escuela.dto.datos.DatosCurso;
+import com.eduardo.escuela.dto.datos.DatosMaestro;
 import com.eduardo.escuela.dto.maestros.MaestroRequest;
 import com.eduardo.escuela.dto.maestros.MaestroResponse;
 import com.eduardo.escuela.entities.Grupo;
@@ -50,5 +51,14 @@ public class MaestroMapper implements CommonMapper<MaestroRequest, MaestroRespon
                 .map(Grupo::getCurso)
                 .map(cursoMapper::entidadADatosCurso)
                 .toList();
+    }
+
+    public DatosMaestro entidadADatosMaestro(Maestro entidad){
+        return entidad == null
+            ? null
+            : new DatosMaestro(
+                entidad.getNombre(), 
+                entidad.getEmail(), 
+                entidad.getTelefono());
     }
 }
