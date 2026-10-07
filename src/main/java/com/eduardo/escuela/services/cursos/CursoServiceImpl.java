@@ -1,7 +1,5 @@
 package com.eduardo.escuela.services.cursos;
 
-import com.eduardo.escuela.mapper.AulaMapper;
-import com.eduardo.escuela.repositories.AulaRepository;
 import java.util.List;
 
 import org.springframework.stereotype.Service;

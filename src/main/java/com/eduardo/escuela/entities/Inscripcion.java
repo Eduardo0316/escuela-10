@@ -2,7 +2,6 @@ package com.eduardo.escuela.entities;
 
 import java.time.LocalDate;
 
-import com.eduardo.escuela.exceptions.DatoInvalidoException;
 import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
 
 import jakarta.persistence.Column;

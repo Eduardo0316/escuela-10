@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.eduardo.escuela.exceptions.DatoInvalidoException;
+import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,21 +42,28 @@ public class Calificacion {
     @Column(name = "FECHA_REGISTRO")
     private LocalDate fechaRegistro = LocalDate.now();
 
-    public static Calificacion crear(BigDecimal calificacion){
-        validarDatos(calificacion);
+    public static Calificacion crear(Inscripcion inscripcion, BigDecimal calificacion){
+        validarDatos(inscripcion, calificacion);
         return Calificacion.builder()
-                .calificacion(calificacion)
-                .fechaRegistro(LocalDate.now())
-                .build();
+            .inscripcion(inscripcion)
+            .calificacion(calificacion)
+            .build();
     }
 
-    private static void validarDatos(BigDecimal calificacion){
+    public void actualizar(Inscripcion inscripcion, BigDecimal calificacion){
+        validarDatos(inscripcion, calificacion);
+        this.inscripcion = inscripcion;
+        this.calificacion = calificacion;
+    }
+
+    private static void validarDatos(Inscripcion inscripcion, BigDecimal calificacion){
         if(
             calificacion.compareTo(BigDecimal.TEN) > 0 ||
             calificacion.compareTo(BigDecimal.ZERO) < 0
         )
             throw new DatoInvalidoException("La calificacion debe ser positiva y estar entre 0 y 10");
-    }
 
-    
+        if(inscripcion == null)
+            throw new RecursoNoEncontradoException("La inscripcion es necesaria");
+    }
 }
