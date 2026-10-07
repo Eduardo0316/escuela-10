@@ -1,6 +1,5 @@
 package com.eduardo.escuela.services.aulas;
 
-import com.eduardo.escuela.repositories.MaestroRepository;
 import com.eduardo.escuela.utils.ServiceUtils;
 
 import java.util.List;
