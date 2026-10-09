@@ -88,9 +88,10 @@ public class Alumno {
         this.matricula = matricula.trim();
     }
     
-    public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String matricula) {
+    public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno,
+                        String email, String matricula) {
+        validarDatos(nombre, apellidoPaterno, apellidoMaterno);
         asignarDatosAcademicos(email, matricula);
-    
         this.nombre = nombre.trim();
         this.apellidoPaterno = apellidoPaterno.trim();
         this.apellidoMaterno = apellidoMaterno.trim();
@@ -125,6 +126,6 @@ public class Alumno {
     }
 
     public String obtenerNombreCompletoAlumno(){
-        return String.join(" ", nombre, apellidoPaterno, apellidoPaterno);
+        return String.join(" ", nombre, apellidoPaterno, apellidoMaterno);
     }
 }

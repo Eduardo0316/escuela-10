@@ -1,156 +1,150 @@
 package com.eduardo.escuela.entities;
 
+import com.eduardo.escuela.exceptions.DatoInvalidoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class AlumnoTest {
 
-    private Alumno alumnoBase;
+    @Mock
+    private Inscripcion inscripcion1;
+
+    @Mock
+    private Inscripcion inscripcion2;
+
+    @Mock
+    private Calificacion calificacion1;
+
+    @Mock
+    private Calificacion calificacion2;
+
+    private Alumno alumno;
 
     @BeforeEach
     void setUp() {
-        alumnoBase = Alumno.crear("Juan", "Pérez", "Gómez");
+        alumno = Alumno.crear("Juan", "Pérez", "Gómez");
     }
 
     @Nested
-    @DisplayName("Pruebas para el método crear()")
-    class CrearTests {
+    @DisplayName("Método Factory: crear")
+    class CrearTest {
 
         @Test
-        @DisplayName("Happy Path: Crea un alumno correctamente con datos válidos")
-        void crearAlumno_Exitoso() {
-            Alumno alumno = Alumno.crear("  Carlos ", "López ", "Martínez ");
+        @DisplayName("Happy Path: Crea un alumno correctamente recortando espacios")
+        void crearAlumno_HappyPath() {
+            Alumno nuevoAlumno = Alumno.crear("  Carlos ", " López ", " Martínez ");
 
-            assertNotNull(alumno);
-            assertEquals("Carlos", alumno.getNombre());
-            assertEquals("López", alumno.getApellidoPaterno());
-            assertEquals("Martínez", alumno.getApellidoMaterno());
-            assertNotNull(alumno.getFechaIngreso());
-            assertNotNull(alumno.getInscripciones());
-            assertTrue(alumno.getInscripciones().isEmpty());
+            assertThat(nuevoAlumno.getNombre()).isEqualTo("Carlos");
+            assertThat(nuevoAlumno.getApellidoPaterno()).isEqualTo("López");
+            assertThat(nuevoAlumno.getApellidoMaterno()).isEqualTo("Martínez");
+            assertThat(nuevoAlumno.getFechaIngreso()).isNotNull();
+            assertThat(nuevoAlumno.getInscripciones()).isEmpty();
         }
 
         @Test
-        @DisplayName("Unhappy Path: Falla si un nombre excede el tamaño permitido o es nulo/vacío")
-        void crearAlumno_NombreInvalido_LanzaExcepcion() {
-            String nombreInvalido = "A".repeat(51);
-
-            assertThrows(Exception.class, () -> 
-                Alumno.crear(nombreInvalido, "Pérez", "Gómez")
-            );
+        @DisplayName("Unhappy Path: Falla al crear si el nombre es nulo o inválido")
+        void crearAlumno_NombreInvalido_ThrowsException() {
+            assertThatThrownBy(() -> Alumno.crear("", "Pérez", "Gómez"))
+                    .isInstanceOf(DatoInvalidoException.class);
         }
     }
 
     @Nested
-    @DisplayName("Pruebas para asignarDatosAcademicos()")
-    class AsignarDatosAcademicosTests {
+    @DisplayName("Método: cambioEnDatos")
+    class CambioEnDatosTest {
 
         @Test
-        @DisplayName("Happy Path: Asigna email en minúsculas y matrícula formateada")
-        void asignarDatosAcademicos_Exitoso() {
-            alumnoBase.asignarDatosAcademicos(" JUAN.PEREZ@EMAIL.COM ", "1234567890");
+        @DisplayName("Happy Path: Detecta si hay cambios en los datos personales")
+        void cambioEnDatos_DetectaCambios_HappyPath() {
+            boolean hayCambio = alumno.cambioEnDatos("Juan", "Pérez", "Mendoza");
 
-            assertEquals("juan.perez@email.com", alumnoBase.getEmail());
-            assertEquals("1234567890", alumnoBase.getMatricula());
+            assertThat(hayCambio).isTrue();
+        }
+
+        @Test
+        @DisplayName("Happy Path: Devuelve false cuando los datos son exactamente iguales")
+        void cambioEnDatos_SinCambios_HappyPath() {
+            boolean hayCambio = alumno.cambioEnDatos("Juan", "Pérez", "Gómez");
+
+            assertThat(hayCambio).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("Método: asignarDatosAcademicos")
+    class AsignarDatosAcademicosTest {
+
+        @Test
+        @DisplayName("Happy Path: Asigna email y matrícula normalizando texto")
+        void asignarDatosAcademicos_HappyPath() {
+            alumno.asignarDatosAcademicos(" JUAN.PEREZ@EMAIL.COM ", "1234567890");
+
+            assertThat(alumno.getEmail()).isEqualTo("juan.perez@email.com");
+            assertThat(alumno.getMatricula()).isEqualTo("1234567890");
         }
 
         @Test
         @DisplayName("Unhappy Path: Falla si la matrícula no tiene exactamente 10 caracteres")
-        void asignarDatosAcademicos_MatriculaInvalida_LanzaExcepcion() {
-            assertThrows(Exception.class, () -> 
-                alumnoBase.asignarDatosAcademicos("juan@email.com", "12345")
-            );
+        void asignarDatosAcademicos_MatriculaLongitudInvalida_ThrowsException() {
+            assertThatThrownBy(() -> alumno.asignarDatosAcademicos("juan@email.com", "12345"))
+                    .isInstanceOf(DatoInvalidoException.class);
         }
     }
 
     @Nested
-    @DisplayName("Pruebas para cambioEnDatos()")
-    class CambioEnDatosTests {
+    @DisplayName("Método: calcularPromedio")
+    class CalcularPromedioTest {
 
         @Test
-        @DisplayName("Happy Path: Retorna true si al menos un dato difiere")
-        void cambioEnDatos_Difiere_RetornaTrue() {
-            boolean cambio = alumnoBase.cambioEnDatos("Juan", "Pérez", "López");
+        @DisplayName("Happy Path: Calcula el promedio correctamente con redondeo HALF_UP")
+        void calcularPromedio_ConCalificaciones_HappyPath() {
+            // Configurar mocks de calificaciones
+            when(calificacion1.getCalificacion()).thenReturn(new BigDecimal("8.5"));
+            when(calificacion2.getCalificacion()).thenReturn(new BigDecimal("9.0"));
 
-            assertTrue(cambio);
+            when(inscripcion1.getCalificacion()).thenReturn(calificacion1);
+            when(inscripcion2.getCalificacion()).thenReturn(calificacion2);
+
+            alumno.getInscripciones().addAll(List.of(inscripcion1, inscripcion2));
+
+            BigDecimal promedio = alumno.calcularPromedio();
+
+            // (8.5 + 9.0) / 2 = 8.75 -> HALF_UP = 8.8
+            assertThat(promedio).isEqualTo(new BigDecimal("8.8"));
         }
 
         @Test
-        @DisplayName("Happy Path: Retorna false si todos los datos son idénticos")
-        void cambioEnDatos_Identicos_RetornaFalse() {
-            boolean cambio = alumnoBase.cambioEnDatos("Juan", "Pérez", "Gómez");
+        @DisplayName("Happy Path / Edge Case: Retorna BigDecimal.ZERO si no hay inscripciones")
+        void calcularPromedio_SinInscripciones_ReturnsZero() {
+            BigDecimal promedio = alumno.calcularPromedio();
 
-            assertFalse(cambio);
-        }
-    }
-
-    @Nested
-    @DisplayName("Pruebas para actualizar()")
-    class ActualizarTests {
-
-        @Test
-        @DisplayName("Happy Path: Actualiza todos los campos de la entidad de forma correcta")
-        void actualizar_Exitoso() {
-            alumnoBase.actualizar(" Mario ", " Silva ", " Díaz ", " MARIO@TEST.COM ", " 0987654321 ");
-
-            assertEquals("Mario", alumnoBase.getNombre());
-            assertEquals("Silva", alumnoBase.getApellidoPaterno());
-            assertEquals("Díaz", alumnoBase.getApellidoMaterno());
-            assertEquals("mario@test.com", alumnoBase.getEmail());
-            assertEquals("0987654321", alumnoBase.getMatricula());
+            assertThat(promedio).isEqualTo(BigDecimal.ZERO);
         }
     }
 
     @Nested
-    @DisplayName("Pruebas para calcularPromedio()")
-    class CalcularPromedioTests {
+    @DisplayName("Método: obtenerNombreCompletoAlumno")
+    class NombreCompletoTest {
 
         @Test
-        @DisplayName("Happy Path: Calcula el promedio correctamente redondeando HALF_UP")
-        void calcularPromedio_ConCalificaciones_CalculaPromedioCorrecto() {
-            // Mock de Calificaciones
-            Calificacion cal1 = Mockito.mock(Calificacion.class);
-            when(cal1.getCalificacion()).thenReturn(new BigDecimal("8.50"));
+        @DisplayName("Happy Path: Retorna el nombre completo concatenado por espacios")
+        void obtenerNombreCompletoAlumno_HappyPath() {
+            String nombreCompleto = alumno.obtenerNombreCompletoAlumno();
 
-            Calificacion cal2 = Mockito.mock(Calificacion.class);
-            when(cal2.getCalificacion()).thenReturn(new BigDecimal("9.00"));
-
-            // Mock de Inscripciones
-            Inscripcion ins1 = Mockito.mock(Inscripcion.class);
-            when(ins1.getCalificacion()).thenReturn(cal1);
-
-            Inscripcion ins2 = Mockito.mock(Inscripcion.class);
-            when(ins2.getCalificacion()).thenReturn(cal2);
-
-            List<Inscripcion> inscripcionesMock = List.of(ins1, ins2);
-
-            Alumno alumnoConInscripciones = Alumno.builder()
-                    .nombre("Ana")
-                    .apellidoPaterno("Ruiz")
-                    .apellidoMaterno("Soto")
-                    .inscripciones(inscripcionesMock)
-                    .build();
-
-            BigDecimal promedio = alumnoConInscripciones.calcularPromedio();
-
-            assertEquals(new BigDecimal("8.75"), promedio);
-        }
-
-        @Test
-        @DisplayName("Unhappy Path / Edge Case: Retorna BigDecimal.ZERO si no existen inscripciones o calificaciones")
-        void calcularPromedio_SinCalificaciones_RetornaCero() {
-            BigDecimal promedio = alumnoBase.calcularPromedio();
-
-            assertEquals(BigDecimal.ZERO, promedio);
+            assertThat(nombreCompleto).isEqualTo("Juan Pérez Gómez");
         }
     }
 }

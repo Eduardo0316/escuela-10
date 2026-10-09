@@ -1,93 +1,135 @@
 package com.eduardo.escuela.entities;
 
-import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("Pruebas unitarias de la entidad Inscripcion")
 class InscripcionTest {
 
-    private Alumno alumnoMock;
-    private Grupo grupoMock;
+    private Alumno alumno;
+    private Grupo grupo;
 
     @BeforeEach
     void setUp() {
-        alumnoMock = Mockito.mock(Alumno.class);
-        grupoMock = Mockito.mock(Grupo.class);
+        alumno = mock(Alumno.class);
+        grupo = mock(Grupo.class);
     }
 
-    @Nested
-    @DisplayName("Pruebas para el método crear()")
-    class CrearTests {
+    // ============================================================
+    // HAPPY PATHS - crear()
+    // ============================================================
 
-        @Test
-        @DisplayName("Happy Path: Crea una inscripción válida con alumno y grupo correctos")
-        void crearInscripcion_Exitoso() {
-            Inscripcion inscripcion = Inscripcion.crear(alumnoMock, grupoMock);
+    @Test
+    @DisplayName("crear: debe construir una Inscripcion correctamente con datos válidos")
+    void crear_conDatosValidos_debeConstruirInscripcion() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
 
-            assertNotNull(inscripcion);
-            assertEquals(alumnoMock, inscripcion.getAlumno());
-            assertEquals(grupoMock, inscripcion.getGrupo());
-            assertNull(inscripcion.getCalificacion());
-            assertEquals(LocalDate.now(), inscripcion.getFechaInscripcion());
-        }
-
-        @Test
-        @DisplayName("Unhappy Path: Falla si el alumno es nulo")
-        void crearInscripcion_AlumnoNulo_LanzaRecursoNoEncontradoException() {
-            RecursoNoEncontradoException ex = assertThrows(RecursoNoEncontradoException.class, () ->
-                    Inscripcion.crear(null, grupoMock)
-            );
-
-            assertEquals("El curso, el maestro y el aula son requeridos", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Unhappy Path: Falla si el grupo es nulo")
-        void crearInscripcion_GrupoNulo_LanzaRecursoNoEncontradoException() {
-            RecursoNoEncontradoException ex = assertThrows(RecursoNoEncontradoException.class, () ->
-                    Inscripcion.crear(alumnoMock, null)
-            );
-
-            assertEquals("El curso, el maestro y el aula son requeridos", ex.getMessage());
-        }
+        assertNotNull(inscripcion);
+        assertEquals(alumno, inscripcion.getAlumno());
+        assertEquals(grupo, inscripcion.getGrupo());
     }
 
-    @Nested
-    @DisplayName("Pruebas para el método actualizar()")
-    class ActualizarTests {
+    @Test
+    @DisplayName("crear: debe inicializar la fecha de inscripción con la fecha actual")
+    void crear_debeInicializarFechaInscripcionConFechaActual() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
 
-        @Test
-        @DisplayName("Happy Path: Actualiza correctamente el alumno y el grupo de la inscripción")
-        void actualizarInscripcion_Exitoso() {
-            Inscripcion inscripcion = Inscripcion.crear(alumnoMock, grupoMock);
+        assertNotNull(inscripcion.getFechaInscripcion());
+        assertEquals(LocalDate.now(), inscripcion.getFechaInscripcion());
+    }
 
-            Alumno nuevoAlumnoMock = Mockito.mock(Alumno.class);
-            Grupo nuevoGrupoMock = Mockito.mock(Grupo.class);
+    @Test
+    @DisplayName("crear: la calificación debe inicializarse en null")
+    void crear_debeInicializarCalificacionNull() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
 
-            inscripcion.actualizar(nuevoAlumnoMock, nuevoGrupoMock);
+        assertNull(inscripcion.getCalificacion());
+    }
 
-            assertEquals(nuevoAlumnoMock, inscripcion.getAlumno());
-            assertEquals(nuevoGrupoMock, inscripcion.getGrupo());
-        }
+    // ============================================================
+    // HAPPY PATHS - actualizar()
+    // ============================================================
 
-        @Test
-        @DisplayName("Unhappy Path: Falla al intentar actualizar enviando alguna relación nula")
-        void actualizarInscripcion_ParametroNulo_LanzaRecursoNoEncontradoException() {
-            Inscripcion inscripcion = Inscripcion.crear(alumnoMock, grupoMock);
+    @Test
+    @DisplayName("actualizar: debe modificar alumno y grupo correctamente")
+    void actualizar_conDatosValidos_debeActualizarCampos() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
 
-            assertThrows(RecursoNoEncontradoException.class, () ->
-                    inscripcion.actualizar(alumnoMock, null)
-            );
+        Alumno nuevoAlumno = mock(Alumno.class);
+        Grupo nuevoGrupo = mock(Grupo.class);
 
-            // Verifica que el estado previo de la entidad permanezca intacto
-            assertEquals(grupoMock, inscripcion.getGrupo());
-        }
+        inscripcion.actualizar(nuevoAlumno, nuevoGrupo);
+
+        assertEquals(nuevoAlumno, inscripcion.getAlumno());
+        assertEquals(nuevoGrupo, inscripcion.getGrupo());
+    }
+
+    @Test
+    @DisplayName("actualizar: no debe alterar la fecha de inscripción ni la calificación")
+    void actualizar_noDebeAlterarFechaNiCalificacion() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
+        LocalDate fechaOriginal = inscripcion.getFechaInscripcion();
+
+        inscripcion.actualizar(mock(Alumno.class), mock(Grupo.class));
+
+        assertEquals(fechaOriginal, inscripcion.getFechaInscripcion());
+        assertNull(inscripcion.getCalificacion());
+    }
+
+    // ============================================================
+    // UNHAPPY PATHS - crear()
+    // ============================================================
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el alumno es null")
+    void crear_conAlumnoNull_debeLanzarExcepcion() {
+        RecursoNoEncontradoException ex = assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> Inscripcion.crear(null, grupo)
+        );
+        assertEquals("El curso, el maestro y el aula son requeridos", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el grupo es null")
+    void crear_conGrupoNull_debeLanzarExcepcion() {
+        assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> Inscripcion.crear(alumno, null)
+        );
+    }
+
+    // ============================================================
+    // UNHAPPY PATHS - actualizar()
+    // ============================================================
+
+    @Test
+    @DisplayName("actualizar: debe lanzar excepción si el alumno es null")
+    void actualizar_conAlumnoNull_debeLanzarExcepcion() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
+
+        assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> inscripcion.actualizar(null, grupo)
+        );
+    }
+
+    @Test
+    @DisplayName("actualizar: debe lanzar excepción si el grupo es null")
+    void actualizar_conGrupoNull_debeLanzarExcepcion() {
+        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
+
+        assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> inscripcion.actualizar(alumno, null)
+        );
     }
 }

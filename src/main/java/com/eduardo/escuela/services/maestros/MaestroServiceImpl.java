@@ -76,7 +76,10 @@ public class MaestroServiceImpl implements MaestroService{
                 request.telefono()
         );
 
-        validarCambiosUnicos(request.email(), request.telefono(), id);
+        validarCambiosUnicos(
+                maestroConCambios.getEmail(),
+                maestroConCambios.getTelefono(),
+                id);
 
         maestro.actualizar(
                 maestroConCambios.getNombre(),

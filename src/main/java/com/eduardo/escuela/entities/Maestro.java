@@ -67,29 +67,45 @@ public class Maestro {
             "El telefono es requerido y debe tener exactamente 10 digitos");
     }
 
-    public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String telefono) {
-        validarDatos(nombre, apellidoPaterno, apellidoMaterno, email, telefono);
+    public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno,
+                        String email, String telefono) {
 
-        this.nombre = nombre.trim();
-        this.apellidoPaterno = apellidoPaterno.trim();
-        this.apellidoMaterno = apellidoMaterno.trim();
-        this.email = email.trim().toLowerCase();
-        this.telefono = telefono.trim();
+        String nombreL = nombre == null ? null : nombre.trim();
+        String apPaternoL = apellidoPaterno == null ? null : apellidoPaterno.trim();
+        String apMaternoL = apellidoMaterno == null ? null : apellidoMaterno.trim();
+        String emailL = email == null ? null : email.trim().toLowerCase();
+        String telefonoL = telefono == null ? null : telefono.trim();
+
+        validarDatos(nombreL, apPaternoL, apMaternoL, emailL, telefonoL);
+
+        this.nombre = nombreL;
+        this.apellidoPaterno = apPaternoL;
+        this.apellidoMaterno = apMaternoL;
+        this.email = emailL;
+        this.telefono = telefonoL;
     }
 
-    public static Maestro crear(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String telefono) {
-        validarDatos(nombre, apellidoPaterno, apellidoMaterno, email, telefono);
+    public static Maestro crear(String nombre, String apellidoPaterno, String apellidoMaterno,
+                                String email, String telefono) {
+
+        String nombreL = nombre == null ? null : nombre.trim();
+        String apPaternoL = apellidoPaterno == null ? null : apellidoPaterno.trim();
+        String apMaternoL = apellidoMaterno == null ? null : apellidoMaterno.trim();
+        String emailL = email == null ? null : email.trim().toLowerCase();
+        String telefonoL = telefono == null ? null : telefono.trim();
+
+        validarDatos(nombreL, apPaternoL, apMaternoL, emailL, telefonoL);
 
         return Maestro.builder()
-            .nombre(nombre.trim())
-            .apellidoPaterno(apellidoPaterno.trim())
-            .apellidoMaterno(apellidoMaterno.trim())
-            .email(email.trim().toLowerCase())
-            .telefono(telefono.trim())
-            .build();
+                .nombre(nombreL)
+                .apellidoPaterno(apPaternoL)
+                .apellidoMaterno(apMaternoL)
+                .email(emailL)
+                .telefono(telefonoL)
+                .build();
     }
 
     public String obtenerNombreCompletoMaestro(){
-        return String.join(" ", nombre, apellidoPaterno, apellidoPaterno);
+        return String.join(" ", nombre, apellidoPaterno, apellidoMaterno);
     }
 }
