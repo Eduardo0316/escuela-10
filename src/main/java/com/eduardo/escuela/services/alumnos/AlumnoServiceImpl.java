@@ -32,17 +32,17 @@ public class AlumnoServiceImpl implements AlumnoService{
         Alumno alumno = obtenerAlumno(id);
 
         if(alumno.cambioEnDatos(request.nombre(), request.apellidoPaterno(), request.apellidoMaterno())){
-            log.info("Actualizando datos del alumno con id: {}", id);
             alumno.actualizar(
                 request.nombre(), 
                 request.apellidoPaterno(), 
                 request.apellidoMaterno(), 
                 generarEmail(request), 
                 generarMatricula(request));
-
+            
+            alumnoRepository.save(alumno);
+            alumnoRepository.flush();
             log.info("Datos del alumno {} actualizados correctamente", alumno.getNombre());
         }
-            
         return alumnoMapper.entidadAResponse(alumno);
     }
 

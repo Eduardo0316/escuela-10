@@ -1,6 +1,7 @@
 package com.eduardo.escuela.entities;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import com.eduardo.escuela.converter.LocalTimeStringConverter;
 import com.eduardo.escuela.enums.DiaSemana;
@@ -67,9 +68,23 @@ public class Horario {
     }
 
     private static void validarDatos(Grupo grupo, DiaSemana dia, LocalTime inicio, LocalTime fin) {
-        if (grupo == null || dia == null || inicio == null || fin == null)
-            throw new DatoInvalidoException("El grupo, el día y las horas son requeridos");
+        if (grupo == null)
+            throw new DatoInvalidoException("El grupo es requerido");
+        if(dia == null)
+            throw new DatoInvalidoException("El día es requerido");
+        if(inicio == null)
+            throw new DatoInvalidoException("La hora de inicio es requerida");
+        if(fin == null)
+            throw new DatoInvalidoException("La hora de fin es requerida");
         if (!fin.isAfter(inicio))
             throw new DatoInvalidoException("La hora de fin debe ser posterior a la hora de inicio");
+    }
+
+    private static final DateTimeFormatter HORA = DateTimeFormatter.ofPattern("HH:mm");
+
+    public static String entidadAHorarioFormateado(Horario horario) {
+        if (horario == null) return null;
+        return horario.getDia().getDescripcion() + " "
+            + horario.getHoraInicio().format(HORA) + " - " + horario.getHoraFin().format(HORA);
     }
 }

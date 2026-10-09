@@ -19,7 +19,7 @@ public record CalificacionResponse(
     BigDecimal calificacion,
     
     @Schema(description = "Día de registro de la calificación", example = "07/10/2026")
-    LocalDate fechaRegistro
+    String fechaRegistro
 ) {
 
 }

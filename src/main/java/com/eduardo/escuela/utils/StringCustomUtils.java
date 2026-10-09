@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import com.eduardo.escuela.exceptions.DatoInvalidoException;
 
 public class StringCustomUtils {
-    private static final DateTimeFormatter formato = DateTimeFormatter.ofPattern(" dd/MM/yyy");
+    private static final DateTimeFormatter formato = DateTimeFormatter.ofPattern(" dd/MM/yyyy");
 
     public static void validarNoVacio(String texto, String mensaje){
         if(texto == null || texto.trim().isBlank())

@@ -41,32 +41,36 @@ public class GrupoServiceImpl implements GrupoService {
     @Override
     public GrupoResponse actualizar(GrupoRequest request, Long id) {
         Grupo grupo = obtenerGrupo(id);
-        Curso curso = obtenerCurso(request.idCurso());
-        Maestro maestro = obtenerMaestro(request.idMaestro());
-        Aula aula = obtenerAula(request.idAula());
 
-        Grupo grupoActualizado = Grupo.crear(curso, maestro, aula, request.periodo());
-
-        if(grupoRepository.existsByCursoIdAndMaestroIdAndAulaIdAndPeriodo(request.idCurso(), request.idMaestro(), request.idAula(), request.periodo()))
-            throw new ConflictoException("Ese grupo ya existe");
+        if (grupoRepository.existsByCursoIdAndMaestroIdAndAulaIdAndPeriodoAndIdNot(
+                request.idCurso(),
+                request.idMaestro(),
+                request.idAula(),
+                request.periodo(),
+                id))
+            throw new ConflictoException("Ya existe otro grupo con esa combinación de curso, maestro, aula y periodo");
 
         grupo.actualizar(
-            grupoActualizado.getCurso(), 
-            grupoActualizado.getMaestro(), 
-            grupoActualizado.getAula(), 
-            grupoActualizado.getPeriodo());
+                obtenerCurso(request.idCurso()),
+                obtenerMaestro(request.idMaestro()),
+                obtenerAula(request.idAula()),
+                request.periodo());
 
-        log.info("Actualizando grupo con id {}", grupo.getId());
+        grupoRepository.save(grupo);
+        grupoRepository.flush();
+
+        log.info("Grupo con id {} actualizado", grupo.getId());
         return grupoMapper.entidadAResponse(grupo);
     }
 
     @Override
     public void eliminar(Long id) {
+        if(horarioRepository.existsByGrupoId(id))
+            throw new EntidadRelacionadaException("No se puede eliminar un grupo con horarios asociados");
+        if(inscripcionRepository.existsByGrupoId(id))
+            throw new EntidadRelacionadaException("No se puede eliminar un grupo con inscripciones asociadas");
+        
         Grupo grupo = obtenerGrupo(id);
-
-        if(horarioRepository.existsByGrupoId(id) || inscripcionRepository.existsByGrupoId(id))
-            throw new EntidadRelacionadaException("No se puede eliminar un grupo con horarios o inscripciones asociadas");
-
         grupoRepository.delete(grupo);
         grupoRepository.flush();
 
@@ -92,13 +96,15 @@ public class GrupoServiceImpl implements GrupoService {
         Curso curso = obtenerCurso(request.idCurso());
         Maestro maestro = obtenerMaestro(request.idMaestro());
         Aula aula = obtenerAula(request.idAula());
-        Grupo grupo = Grupo.crear(curso, maestro, aula, request.periodo());
+        Grupo grupo = grupoMapper.requestAEntidad(request, curso, maestro, aula);
 
         if(grupoRepository.existsByCursoIdAndMaestroIdAndAulaIdAndPeriodo(request.idCurso(), request.idMaestro(), request.idAula(), request.periodo()))
             throw new ConflictoException("Ese grupo ya existe");
 
         grupoRepository.save(grupo);
-        log.info("Grupo con id {} guardado", grupo.getId());
+        grupoRepository.flush();
+        
+        log.info("Grupo con id {} guardado", request.idCurso());
         return grupoMapper.entidadAResponse(grupo);
     }
 

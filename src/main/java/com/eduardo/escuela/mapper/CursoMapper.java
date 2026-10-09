@@ -22,11 +22,10 @@ public class CursoMapper implements CommonMapper<CursoRequest, CursoResponse, Cu
 
     @Override
     public Curso requestAEntidad(CursoRequest request) {
-        return Curso.builder()
-            .nombre(request.nombre())
-            .descripcion(request.descripcion())
-            .creditos(request.creditos())
-            .build();
+        return Curso.crear(
+            request.nombre(), 
+            request.descripcion(), 
+            request.creditos());
     }
     
     public DatosCurso entidadADatosCurso(Curso entidad){

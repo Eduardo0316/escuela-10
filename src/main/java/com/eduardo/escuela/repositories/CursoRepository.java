@@ -8,4 +8,6 @@ import com.eduardo.escuela.entities.Curso;
 @Repository 
 public interface CursoRepository extends JpaRepository<Curso, Long>{
     boolean existsByNombre(String nombre);
+
+    boolean existsByNombreAndIdNot(String nombre, Long id);
 }

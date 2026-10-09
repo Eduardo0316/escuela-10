@@ -32,16 +32,14 @@ public class AulasServiceImpl implements AulasService {
 
     @Override
     public AulaResponse actualizar(AulaRequest request, Long id) {
-        Aula aula = obtenerAula(id);
-
-        Aula aulaActualizada = Aula.crear(
-            request.nombre(), 
-            request.capacidad());
-        
         validarDatosUnicos(request.nombre());
 
-        aula.actualizar(aulaActualizada.getNombre(), aulaActualizada.getCapacidad());
+        Aula aula = obtenerAula(id);
+        aula.actualizar(request.nombre(), request.capacidad());
+
         aulaRepository.save(aula);
+        aulaRepository.flush();
+        
         log.info("Aula con id {} actualizada", aula.getId());
 
         return aulaMapper.entidadAResponse(aula);
@@ -57,7 +55,7 @@ public class AulasServiceImpl implements AulasService {
         aulaRepository.delete(aula);
         aulaRepository.flush();
 
-        log.info("Aula con id {} eliminada");
+        log.info("Aula con id {} eliminada", id);
     }
 
     @Override
@@ -78,10 +76,11 @@ public class AulasServiceImpl implements AulasService {
 
     @Override
     public AulaResponse registrar(AulaRequest request) {
-        Aula aula = Aula.crear(request.nombre(), request.capacidad());
+        Aula aula = aulaMapper.requestAEntidad(request);
         validarDatosUnicos(aula.getNombre());
-        log.info("Aula agregada con id: {}", aula.getId());
         aulaRepository.save(aula);
+        aulaRepository.flush();
+        log.info("Aula agregada con id: {}", aula.getId());
         return aulaMapper.entidadAResponse(aula);
     }
 

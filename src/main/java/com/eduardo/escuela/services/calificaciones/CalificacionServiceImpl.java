@@ -30,18 +30,16 @@ public class CalificacionServiceImpl implements CalificacionService{
     @Override
     public CalificacionResponse actualizar(CalificacionRequest request, Long id) {
         Calificacion calificacion = obtenerCalificacion(id);
-        Inscripcion inscripcion = obtenerInscripcion(request.idInscripcion());
 
-        Calificacion calificacionActualizada = Calificacion.crear(inscripcion, request.calificacion());
-        // if(calificacionRepository.existsByInscripcionId(request.idInscripcion()))
-        //     throw new ConflictoException("Esta inscripcion ya tiene calificacion");
+        if (calificacionRepository.existsByInscripcionIdAndIdNot(request.idInscripcion(), id))
+            throw new ConflictoException("Esa inscripción ya tiene otra calificación");
 
-        calificacion.actualizar(
-            calificacionActualizada.getInscripcion(), 
-            calificacionActualizada.getCalificacion());
+        calificacion.actualizar(obtenerInscripcion(request.idInscripcion()), request.calificacion());
 
-        log.info("Calificación con id {} acualizada", calificacion.getId());
+        calificacionRepository.save(calificacion);
+        calificacionRepository.flush();
 
+        log.info("Calificación con id {} actualizada", id);
         return calificacionMapper.entidadAResponse(calificacion);
     }
 
@@ -69,13 +67,15 @@ public class CalificacionServiceImpl implements CalificacionService{
 
     @Override
     public CalificacionResponse registrar(CalificacionRequest request) {
-        Inscripcion inscripcion = obtenerInscripcion(request.idInscripcion());
-        Calificacion calificacion = Calificacion.crear(inscripcion, request.calificacion());
-
         if(calificacionRepository.existsByInscripcionId(request.idInscripcion()))
             throw new ConflictoException("Esta inscripcion ya tiene calificacion");
+
+        Inscripcion inscripcion = obtenerInscripcion(request.idInscripcion());
+        Calificacion calificacion = calificacionMapper.requestAEntidad(request, inscripcion);
+
         
         calificacionRepository.save(calificacion);
+        calificacionRepository.flush();
         log.info("Guardando calificacion con id {}", calificacion.getId());
         
         return calificacionMapper.entidadAResponse(calificacion);
