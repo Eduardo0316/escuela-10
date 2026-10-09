@@ -88,4 +88,8 @@ public class Maestro {
             .telefono(telefono.trim())
             .build();
     }
+
+    public String obtenerNombreCompletoMaestro(){
+        return String.join(" ", nombre, apellidoPaterno, apellidoPaterno);
+    }
 }

@@ -30,22 +30,17 @@ public class CursoServiceImpl implements CursoService {
 
     @Override
     public CursoResponse actualizar(CursoRequest request, Long id) {
-        Curso curso = obtenerCurso(id);
+        validarDatosUnicos(request.nombre(), id);
 
-        Curso cursoActualizado = Curso.crear(
+        Curso curso = obtenerCurso(id);
+        curso.actualizar(
             request.nombre(), 
             request.descripcion(), 
             request.creditos());
-
-        validarDatosUnicos(request.nombre());
-
-        curso.actualizar(
-            cursoActualizado.getNombre(), 
-            cursoActualizado.getDescripcion(), 
-            cursoActualizado.getCreditos());
         cursoRepository.save(curso);
-        log.info("Curso con id {} actualizado", curso.getId());
+        cursoRepository.flush();
 
+        log.info("Curso con id {} actualizado", curso.getId());
         return cursoMapper.entidadAResponse(curso);
     }
 
@@ -80,13 +75,11 @@ public class CursoServiceImpl implements CursoService {
 
     @Override
     public CursoResponse registrar(CursoRequest request) {
-        Curso curso = Curso.crear(
-            request.nombre(), 
-            request.descripcion(), 
-            request.creditos());
-        
-        validarDatosUnicos(request.nombre());
+        Curso curso = cursoMapper.requestAEntidad(request);
+        validarNombreUnico(request.nombre());
         cursoRepository.save(curso);
+        cursoRepository.flush();
+
         log.info("Curso con id {} registrado", curso.getId());
         return cursoMapper.entidadAResponse(curso);
     }
@@ -95,7 +88,12 @@ public class CursoServiceImpl implements CursoService {
         return ServiceUtils.obtenerEntidadOException(cursoRepository, id, Curso.class);
     }
 
-    private void validarDatosUnicos(String nombre){
+    private void validarDatosUnicos(String nombre, Long id){
+        if(cursoRepository.existsByNombreAndIdNot(nombre, id))
+            throw new ConflictoException("Ya existe un curso con ese nombre");
+    }
+    
+    private void validarNombreUnico(String nombre){
         if(cursoRepository.existsByNombre(nombre))
             throw new ConflictoException("Ya existe un curso con ese nombre");
     }

@@ -57,7 +57,10 @@ public class MaestroMapper implements CommonMapper<MaestroRequest, MaestroRespon
         return entidad == null
             ? null
             : new DatosMaestro(
-                entidad.getNombre(), 
+                String.join(" ", 
+                    entidad.getNombre(), 
+                    entidad.getApellidoPaterno(), 
+                    entidad.getApellidoMaterno()), 
                 entidad.getEmail(), 
                 entidad.getTelefono());
     }

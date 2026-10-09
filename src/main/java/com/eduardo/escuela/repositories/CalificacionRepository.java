@@ -8,4 +8,6 @@ import com.eduardo.escuela.entities.Calificacion;
 @Repository 
 public interface CalificacionRepository extends JpaRepository<Calificacion, Long>{
     boolean existsByInscripcionId(Long idInscripcion);
+
+    boolean existsByInscripcionIdAndIdNot(Long inscripcionId, Long id);
 }

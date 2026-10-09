@@ -57,13 +57,11 @@ public class Calificacion {
     }
 
     private static void validarDatos(Inscripcion inscripcion, BigDecimal calificacion){
-        if(
-            calificacion.compareTo(BigDecimal.TEN) > 0 ||
-            calificacion.compareTo(BigDecimal.ZERO) < 0
-        )
-            throw new DatoInvalidoException("La calificacion debe ser positiva y estar entre 0 y 10");
-
         if(inscripcion == null)
             throw new RecursoNoEncontradoException("La inscripcion es necesaria");
+        if(calificacion.compareTo(BigDecimal.ZERO) < 0)
+            throw new DatoInvalidoException("La falificacion debe ser positiva");
+        if(calificacion.compareTo(BigDecimal.TEN) > 0)
+            throw new DatoInvalidoException("La calificacion debe estar entre 0 y 10");
     }
 }

@@ -36,15 +36,15 @@ public class InscripcionServiceImpl implements InscripcionService{
     @Override
     public InscripcionResponse actualizar(InscripcionRequest request, Long id) {
         Inscripcion inscripcion = obtenerInscripcion(id);
-        Alumno alumno = obtenerAlumno(request.idAlumno());
-        Grupo grupo = obtenerGrupo(request.idGrupo());
 
-        Inscripcion inscripcionActualizada = Inscripcion.crear(alumno, grupo);
+        if (inscripcionRepository.existsByAlumnoIdAndGrupoIdAndIdNot(request.idAlumno(), request.idGrupo(), id))
+            throw new ConflictoException("El alumno ya se encuentra inscrito en este grupo");
 
-        if(inscripcionRepository.existsByAlumnoIdAndGrupoId(request.idAlumno(), request.idGrupo()))
-            throw new EntidadRelacionadaException("El alumno ya se encuentra inscrito en este curso");
+        inscripcion.actualizar(obtenerAlumno(request.idAlumno()), obtenerGrupo(request.idGrupo()));
 
-        inscripcion.actualizar(inscripcionActualizada.getAlumno(), inscripcionActualizada.getGrupo());
+        inscripcionRepository.save(inscripcion);
+        inscripcionRepository.flush();
+
         log.info("Inscripcion con id {} actualizada", id);
         return inscripcionMapper.entidadAResponse(inscripcion);
     }
@@ -80,15 +80,16 @@ public class InscripcionServiceImpl implements InscripcionService{
 
     @Override
     public InscripcionResponse registrar(InscripcionRequest request) {
-        Alumno alumno = obtenerAlumno(request.idAlumno());
-        Grupo grupo = obtenerGrupo(request.idGrupo());
-
-        Inscripcion inscripcion = Inscripcion.crear(alumno, grupo);
-
         if(inscripcionRepository.existsByAlumnoIdAndGrupoId(request.idAlumno(), request.idGrupo()))
             throw new ConflictoException("El alumno ya se encuentra inscrito en este grupo");
 
+        Alumno alumno = obtenerAlumno(request.idAlumno());
+        Grupo grupo = obtenerGrupo(request.idGrupo());
+
+        Inscripcion inscripcion = inscripcionMapper.requestAEntidad(request, alumno, grupo);
         inscripcionRepository.save(inscripcion);
+        inscripcionRepository.flush();
+        
         log.info("Inscribiendo alumno con id {} al grupo con id {} en inscripcion id {}", request.idAlumno(), request.idGrupo(), inscripcion.getId());
         return inscripcionMapper.entidadAResponse(inscripcion);
     }

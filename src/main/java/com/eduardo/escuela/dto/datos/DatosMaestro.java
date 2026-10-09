@@ -11,7 +11,7 @@ public record DatosMaestro(
     String email,
 
     @Schema(description = "Teléfono del maestro", example = "2223334455")
-    String numero
+    String telefono
 ) {
 
 }

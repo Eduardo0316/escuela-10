@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.eduardo.escuela.dto.alumnos.AlumnoRequest;
 import com.eduardo.escuela.dto.alumnos.AlumnoResponse;
+import com.eduardo.escuela.dto.datos.DatosAlumno;
 import com.eduardo.escuela.dto.datos.DatosCalificacion;
 import com.eduardo.escuela.entities.Alumno;
 import com.eduardo.escuela.utils.StringCustomUtils;
@@ -63,4 +64,17 @@ public class AlumnoMapper implements CommonMapper<AlumnoRequest, AlumnoResponse,
         return alumno;
     }
 
+    public DatosAlumno entidadADatosAlumno(Alumno alumno) {
+        if (alumno == null) return null;
+        return new DatosAlumno(
+            String.join( 
+                " ", 
+                alumno.getNombre(), 
+                alumno.getApellidoPaterno(), 
+                alumno.getApellidoMaterno()),
+            alumno.getMatricula(),
+            alumno.getEmail(),
+            StringCustomUtils.localDateAString(alumno.getFechaIngreso())
+        );
+    }
 }

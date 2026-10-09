@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.eduardo.escuela.dto.datos.DatosAula;
 import com.eduardo.escuela.dto.datos.DatosCurso;
-import com.eduardo.escuela.dto.datos.DatosHorario;
 import com.eduardo.escuela.dto.datos.DatosMaestro;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,7 +23,7 @@ public record GrupoResponse(
     DatosAula aula,
     
     @Schema(description = "Datos de los horarios del grupo")
-    List<DatosHorario> horarios,
+    List<String> horarios,
     
     @Schema(description = "Periodo del grupo")
     String periodo

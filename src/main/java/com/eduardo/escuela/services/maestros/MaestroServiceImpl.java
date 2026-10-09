@@ -59,6 +59,7 @@ public class MaestroServiceImpl implements MaestroService{
         validarDatosUnicos(maestro.getEmail(), maestro.getTelefono());
 
         maestroRepository.save(maestro);
+        maestroRepository.flush();
         log.info("Maestro agregado con id: {}", maestro.getId());
         return maestroMapper.entidadAResponse(maestro);
     }
@@ -86,6 +87,7 @@ public class MaestroServiceImpl implements MaestroService{
         );
 
         maestroRepository.save(maestro);
+        maestroRepository.flush();
 
         log.info("Maestro {} actualizado con id: {}", maestro.getNombre(), maestro.getId());
 

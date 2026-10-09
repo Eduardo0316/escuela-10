@@ -86,8 +86,11 @@ public class Grupo {
     }
 
     private static void validarRelaciones(Curso curso, Maestro maestro, Aula aula) {
-        if (curso == null || maestro == null || aula == null) {
-            throw new RecursoNoEncontradoException("El curso, el maestro y el aula son requeridos");
-        }
+        if (curso == null)
+            throw new RecursoNoEncontradoException("El curso es requerido");
+        if (maestro == null)
+            throw new RecursoNoEncontradoException("El maestro es requerido");
+        if (aula == null)
+            throw new RecursoNoEncontradoException("El alua es requerida");
     }
 }
