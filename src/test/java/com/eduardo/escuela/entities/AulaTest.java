@@ -1,76 +1,73 @@
 package com.eduardo.escuela.entities;
 
+import com.eduardo.escuela.exceptions.DatoInvalidoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AulaTest {
 
-    private Aula aulaBase;
+    private Aula aula;
 
     @BeforeEach
     void setUp() {
-        aulaBase = Aula.crear("Laboratorio A", 30);
+        aula = Aula.crear("Aula 101", 30);
     }
 
     @Nested
-    @DisplayName("Pruebas para el método crear()")
-    class CrearTests {
+    @DisplayName("Método Factory: crear")
+    class CrearTest {
 
         @Test
-        @DisplayName("Happy Path: Crea un aula correctamente con datos válidos")
-        void crearAula_Exitoso() {
-            Aula aula = Aula.crear("  Aula 101 ", 25);
+        @DisplayName("Happy Path: Crea un aula correctamente aplicando trim al nombre")
+        void crearAula_HappyPath() {
+            Aula nuevaAula = Aula.crear("  Laboratorio A  ", 25);
 
-            assertNotNull(aula);
-            assertEquals("Aula 101", aula.getNombre());
-            assertEquals(25, aula.getCapacidad());
+            assertThat(nuevaAula.getNombre()).isEqualTo("Laboratorio A");
+            assertThat(nuevaAula.getCapacidad()).isEqualTo(25);
         }
 
         @Test
-        @DisplayName("Unhappy Path: Falla si el nombre excede el límite o es nulo/vacío")
-        void crearAula_NombreInvalido_LanzaExcepcion() {
-            String nombreLargo = "A".repeat(101);
-
-            assertThrows(Exception.class, () -> 
-                Aula.crear(nombreLargo, 25)
-            );
+        @DisplayName("Unhappy Path: Falla al crear si el nombre es nulo o excede longitud")
+        void crearAula_NombreInvalido_ThrowsException() {
+            assertThatThrownBy(() -> Aula.crear("", 30))
+                    .isInstanceOf(DatoInvalidoException.class);
         }
 
         @Test
-        @DisplayName("Unhappy Path: Falla si la capacidad no es positiva o es nula")
-        void crearAula_CapacidadInvalida_LanzaExcepcion() {
-            assertThrows(Exception.class, () -> 
-                Aula.crear("Aula 102", -5)
-            );
+        @DisplayName("Unhappy Path: Falla al crear si la capacidad es negativa o nula")
+        void crearAula_CapacidadInvalida_ThrowsException() {
+            assertThatThrownBy(() -> Aula.crear("Aula 102", -5))
+                    .isInstanceOf(DatoInvalidoException.class);
         }
     }
 
     @Nested
-    @DisplayName("Pruebas para el método actualizar()")
-    class ActualizarTests {
+    @DisplayName("Método: actualizar")
+    class ActualizarTest {
 
         @Test
-        @DisplayName("Happy Path: Actualiza los campos del aula correctamente")
-        void actualizarAula_Exitoso() {
-            aulaBase.actualizar("Laboratorio B", 40);
+        @DisplayName("Happy Path: Actualiza los datos del aula correctamente")
+        void actualizarAula_HappyPath() {
+            aula.actualizar("Aula Magna", 100);
 
-            assertEquals("Laboratorio B", aulaBase.getNombre());
-            assertEquals(40, aulaBase.getCapacidad());
+            assertThat(aula.getNombre()).isEqualTo("Aula Magna");
+            assertThat(aula.getCapacidad()).isEqualTo(100);
         }
 
         @Test
-        @DisplayName("Unhappy Path: Falla al intentar actualizar con una capacidad inválida")
-        void actualizarAula_CapacidadInvalida_LanzaExcepcion() {
-            assertThrows(Exception.class, () -> 
-                aulaBase.actualizar("Laboratorio B", 0)
-            );
-            // Verifica que no se hayan modificado los datos originales tras el fallo
-            assertEquals("Laboratorio A", aulaBase.getNombre());
-            assertEquals(30, aulaBase.getCapacidad());
+        @DisplayName("Unhappy Path: Falla si se intenta actualizar con capacidad inválida")
+        void actualizarAula_CapacidadInvalida_ThrowsException() {
+            assertThatThrownBy(() -> aula.actualizar("Aula 101", 0))
+                    .isInstanceOf(DatoInvalidoException.class);
+
+            // Verifica que los datos no hayan cambiado tras la excepción
+            assertThat(aula.getNombre()).isEqualTo("Aula 101");
+            assertThat(aula.getCapacidad()).isEqualTo(30);
         }
     }
 }

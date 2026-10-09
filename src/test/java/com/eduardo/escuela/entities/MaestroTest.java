@@ -1,85 +1,190 @@
 package com.eduardo.escuela.entities;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.eduardo.escuela.exceptions.DatoInvalidoException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("Pruebas unitarias de la entidad Maestro")
 class MaestroTest {
 
-    private Maestro maestroBase;
+    private String nombreValido;
+    private String apellidoPaternoValido;
+    private String apellidoMaternoValido;
+    private String emailValido;
+    private String telefonoValido;
 
     @BeforeEach
     void setUp() {
-        maestroBase = Maestro.crear("Roberto", "Gómez", "Bolaños", "roberto@email.com", "5512345678");
+        nombreValido = "Eduardo";
+        apellidoPaternoValido = "García";
+        apellidoMaternoValido = "López";
+        emailValido = "eduardo@escuela.com";
+        telefonoValido = "5512345678";
     }
 
-    @Nested
-    @DisplayName("Pruebas para el método crear()")
-    class CrearTests {
+    // ============================================================
+    // HAPPY PATHS - crear()
+    // ============================================================
 
-        @Test
-        @DisplayName("Happy Path: Crea un maestro correctamente con datos válidos, email en minúsculas y trim")
-        void crearMaestro_Exitoso() {
-            Maestro maestro = Maestro.crear("  Ana ", " Martínez ", " López ", " ANA.MARTINEZ@EMAIL.COM ", " 5587654321 ");
+    @Test
+    @DisplayName("crear: debe construir un Maestro correctamente con datos válidos")
+    void crear_conDatosValidos_debeConstruirMaestro() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                emailValido, telefonoValido);
 
-            assertNotNull(maestro);
-            assertEquals("Ana", maestro.getNombre());
-            assertEquals("Martínez", maestro.getApellidoPaterno());
-            assertEquals("López", maestro.getApellidoMaterno());
-            assertEquals("ana.martinez@email.com", maestro.getEmail());
-            assertEquals("5587654321", maestro.getTelefono());
-            assertNotNull(maestro.getGrupos());
-            assertTrue(maestro.getGrupos().isEmpty());
-        }
-
-        @Test
-        @DisplayName("Unhappy Path: Falla si el teléfono no tiene exactamente 10 caracteres")
-        void crearMaestro_TelefonoInvalido_LanzaExcepcion() {
-            assertThrows(Exception.class, () ->
-                    Maestro.crear("Roberto", "Gómez", "Bolaños", "roberto@email.com", "12345")
-            );
-        }
-
-        @Test
-        @DisplayName("Unhappy Path: Falla si el email no cumple el tamaño mínimo (menos de 8 caracteres)")
-        void crearMaestro_EmailCorto_LanzaExcepcion() {
-            assertThrows(Exception.class, () ->
-                    Maestro.crear("Roberto", "Gómez", "Bolaños", "a@b.c", "5512345678")
-            );
-        }
+        assertNotNull(maestro);
+        assertEquals("Eduardo", maestro.getNombre());
+        assertEquals("García", maestro.getApellidoPaterno());
+        assertEquals("López", maestro.getApellidoMaterno());
+        assertEquals("eduardo@escuela.com", maestro.getEmail());
+        assertEquals("5512345678", maestro.getTelefono());
     }
 
-    @Nested
-    @DisplayName("Pruebas para el método actualizar()")
-    class ActualizarTests {
+    @Test
+    @DisplayName("crear: debe recortar espacios en blanco de todos los campos")
+    void crear_conEspaciosEnBlanco_debeRecortarlos() {
+        Maestro maestro = Maestro.crear(
+                "  Eduardo  ", "  García  ", "  López  ",
+                "  eduardo@escuela.com  ", "  5512345678  ");
 
-        @Test
-        @DisplayName("Happy Path: Actualiza todos los campos del maestro correctamente")
-        void actualizarMaestro_Exitoso() {
-            maestroBase.actualizar(" Carlos ", " Hernández ", " Pérez ", " CARLOS.H@EMAIL.COM ", " 5599887766 ");
+        assertEquals("Eduardo", maestro.getNombre());
+        assertEquals("García", maestro.getApellidoPaterno());
+        assertEquals("López", maestro.getApellidoMaterno());
+        assertEquals("eduardo@escuela.com", maestro.getEmail());
+        assertEquals("5512345678", maestro.getTelefono());
+    }
 
-            assertEquals("Carlos", maestroBase.getNombre());
-            assertEquals("Hernández", maestroBase.getApellidoPaterno());
-            assertEquals("Pérez", maestroBase.getApellidoMaterno());
-            assertEquals("carlos.h@email.com", maestroBase.getEmail());
-            assertEquals("5599887766", maestroBase.getTelefono());
-        }
+    @Test
+    @DisplayName("crear: debe convertir el email a minúsculas")
+    void crear_conEmailEnMayusculas_debeConvertirloAMinusculas() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                "EDUARDO@ESCUELA.COM", telefonoValido);
 
-        @Test
-        @DisplayName("Unhappy Path: Falla al actualizar si un apellido excede los 50 caracteres")
-        void actualizarMaestro_ApellidoLargo_LanzaExcepcion() {
-            String apellidoLargo = "A".repeat(51);
+        assertEquals("eduardo@escuela.com", maestro.getEmail());
+    }
 
-            assertThrows(Exception.class, () ->
-                    maestroBase.actualizar("Roberto", apellidoLargo, "Bolaños", "roberto@email.com", "5512345678")
-            );
+    @Test
+    @DisplayName("crear: debe inicializar la lista de grupos vacía")
+    void crear_debeInicializarListaDeGruposVacia() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                emailValido, telefonoValido);
 
-            // Se comprueba que el estado de la entidad permanezca inalterado tras el fallo
-            assertEquals("Gómez", maestroBase.getApellidoPaterno());
-            assertEquals("roberto@email.com", maestroBase.getEmail());
-        }
+        assertNotNull(maestro.getGrupos());
+        assertTrue(maestro.getGrupos().isEmpty());
+    }
+
+    // ============================================================
+    // HAPPY PATHS - actualizar()
+    // ============================================================
+
+    @Test
+    @DisplayName("actualizar: debe modificar todos los campos correctamente")
+    void actualizar_conDatosValidos_debeActualizarCampos() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                emailValido, telefonoValido);
+
+        maestro.actualizar("Ana", "Martínez", "Ruiz",
+                "ANA@ESCUELA.COM", "5598765432");
+
+        assertEquals("Ana", maestro.getNombre());
+        assertEquals("Martínez", maestro.getApellidoPaterno());
+        assertEquals("Ruiz", maestro.getApellidoMaterno());
+        assertEquals("ana@escuela.com", maestro.getEmail());
+        assertEquals("5598765432", maestro.getTelefono());
+    }
+
+    // ============================================================
+    // HAPPY PATHS - obtenerNombreCompletoMaestro()
+    // ============================================================
+
+    @Test
+    @DisplayName("obtenerNombreCompletoMaestro: debe concatenar nombre y apellidos")
+    void obtenerNombreCompletoMaestro_debeConcatenarCampos() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                emailValido, telefonoValido);
+
+        String nombreCompleto = maestro.obtenerNombreCompletoMaestro();
+
+        assertNotNull(nombreCompleto);
+        assertEquals("Eduardo García López", nombreCompleto);
+    }
+
+    // ============================================================
+    // UNHAPPY PATHS - crear()
+    // ============================================================
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el nombre es null")
+    void crear_conNombreNull_debeLanzarExcepcion() {
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> Maestro.crear(null, apellidoPaternoValido, apellidoMaternoValido,
+                        emailValido, telefonoValido)
+        );
+    }
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el email es demasiado corto")
+    void crear_conEmailDemasiadoCorto_debeLanzarExcepcion() {
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> Maestro.crear(nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                        "a@b.com", telefonoValido) // 7 caracteres
+        );
+    }
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el teléfono no tiene exactamente 10 dígitos")
+    void crear_conTelefonoLongitudInvalida_debeLanzarExcepcion() {
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> Maestro.crear(nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                        emailValido, "551234567") // 9 dígitos
+        );
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> Maestro.crear(nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                        emailValido, "55123456789") // 11 dígitos
+        );
+    }
+
+    // ============================================================
+    // UNHAPPY PATHS - actualizar()
+    // ============================================================
+
+    @Test
+    @DisplayName("actualizar: debe lanzar excepción si el apellido paterno es null")
+    void actualizar_conApellidoPaternoNull_debeLanzarExcepcion() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                emailValido, telefonoValido);
+
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> maestro.actualizar(nombreValido, null, apellidoMaternoValido,
+                        emailValido, telefonoValido)
+        );
+    }
+
+    @Test
+    @DisplayName("actualizar: debe lanzar excepción si el teléfono no tiene 10 dígitos")
+    void actualizar_conTelefonoInvalido_debeLanzarExcepcion() {
+        Maestro maestro = Maestro.crear(
+                nombreValido, apellidoPaternoValido, apellidoMaternoValido,
+                emailValido, telefonoValido);
+
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> maestro.actualizar("Ana", "Martínez", "Ruiz",
+                        "ana@escuela.com", "123")
+        );
     }
 }

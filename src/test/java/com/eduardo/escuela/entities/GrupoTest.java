@@ -1,102 +1,142 @@
 package com.eduardo.escuela.entities;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+
+import com.eduardo.escuela.exceptions.DatoInvalidoException;
 import com.eduardo.escuela.exceptions.RecursoNoEncontradoException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+@DisplayName("Pruebas unitarias de la entidad Grupo")
 class GrupoTest {
 
-    private Curso cursoMock;
-    private Maestro maestroMock;
-    private Aula aulaMock;
+    private Curso curso;
+    private Maestro maestro;
+    private Aula aula;
+    private String periodoValido;
 
     @BeforeEach
     void setUp() {
-        cursoMock = Mockito.mock(Curso.class);
-        maestroMock = Mockito.mock(Maestro.class);
-        aulaMock = Mockito.mock(Aula.class);
+        // Mocks simples: la entidad Grupo solo verifica que no sean null,
+        // no llama a ningún método de estas clases.
+        curso = mock(Curso.class);
+        maestro = mock(Maestro.class);
+        aula = mock(Aula.class);
+        periodoValido = "2024-1";
     }
 
-    @Nested
-    @DisplayName("Pruebas para el método crear()")
-    class CrearTests {
+    // ============================================================
+    // HAPPY PATHS - crear()
+    // ============================================================
 
-        @Test
-        @DisplayName("Happy Path: Crea un grupo exitosamente con relaciones y periodo válidos")
-        void crearGrupo_Exitoso() {
-            String periodoValido = "2026-1";
+    @Test
+    @DisplayName("crear: debe construir un Grupo correctamente con datos válidos")
+    void crear_conDatosValidos_debeConstruirGrupo() {
+        Grupo grupo = Grupo.crear(curso, maestro, aula, periodoValido);
 
-            Grupo grupo = Grupo.crear(cursoMock, maestroMock, aulaMock, periodoValido);
-
-            assertNotNull(grupo);
-            assertEquals(cursoMock, grupo.getCurso());
-            assertEquals(maestroMock, grupo.getMaestro());
-            assertEquals(aulaMock, grupo.getAula());
-            assertEquals("2026-1", grupo.getPeriodo());
-            assertNotNull(grupo.getHorarios());
-            assertTrue(grupo.getHorarios().isEmpty());
-        }
-
-        @Test
-        @DisplayName("Unhappy Path: Falla si alguna relación (curso, maestro o aula) es nula")
-        void crearGrupo_RelacionNula_LanzaRecursoNoEncontradoException() {
-            RecursoNoEncontradoException ex = assertThrows(RecursoNoEncontradoException.class, () ->
-                    Grupo.crear(cursoMock, null, aulaMock, "2026-1")
-            );
-
-            assertEquals("El curso, el maestro y el aula son requeridos", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Unhappy Path: Falla si el periodo excede los 20 caracteres o es inválido")
-        void crearGrupo_PeriodoInvalido_LanzaExcepcion() {
-            String periodoLargo = "A".repeat(21);
-
-            assertThrows(Exception.class, () ->
-                    Grupo.crear(cursoMock, maestroMock, aulaMock, periodoLargo)
-            );
-        }
+        assertNotNull(grupo);
+        assertEquals(curso, grupo.getCurso());
+        assertEquals(maestro, grupo.getMaestro());
+        assertEquals(aula, grupo.getAula());
+        assertEquals(periodoValido, grupo.getPeriodo());
+        assertNotNull(grupo.getHorarios());
+        assertTrue(grupo.getHorarios().isEmpty());
     }
 
-    @Nested
-    @DisplayName("Pruebas para el método actualizar()")
-    class ActualizarTests {
+    @Test
+    @DisplayName("crear: debe aceptar un periodo con la longitud mínima permitida (1 carácter)")
+    void crear_conPeriodoMinimo_debeConstruirGrupo() {
+        Grupo grupo = Grupo.crear(curso, maestro, aula, "A");
 
-        @Test
-        @DisplayName("Happy Path: Actualiza correctamente las relaciones y el periodo")
-        void actualizarGrupo_Exitoso() {
-            Grupo grupo = Grupo.crear(cursoMock, maestroMock, aulaMock, "2026-1");
+        assertNotNull(grupo);
+        assertEquals("A", grupo.getPeriodo());
+    }
 
-            Curso nuevoCursoMock = Mockito.mock(Curso.class);
-            Maestro nuevoMaestroMock = Mockito.mock(Maestro.class);
-            Aula nuevaAulaMock = Mockito.mock(Aula.class);
-            String nuevoPeriodo = "2026-2";
+    @Test
+    @DisplayName("crear: debe aceptar un periodo con la longitud máxima permitida (20 caracteres)")
+    void crear_conPeriodoMaximo_debeConstruirGrupo() {
+        String periodoMax = "12345678901234567890"; // 20 chars
+        Grupo grupo = Grupo.crear(curso, maestro, aula, periodoMax);
 
-            grupo.actualizar(nuevoCursoMock, nuevoMaestroMock, nuevaAulaMock, nuevoPeriodo);
+        assertNotNull(grupo);
+        assertEquals(periodoMax, grupo.getPeriodo());
+    }
 
-            assertEquals(nuevoCursoMock, grupo.getCurso());
-            assertEquals(nuevoMaestroMock, grupo.getMaestro());
-            assertEquals(nuevaAulaMock, grupo.getAula());
-            assertEquals("2026-2", grupo.getPeriodo());
-        }
+    // ============================================================
+    // HAPPY PATHS - actualizar()
+    // ============================================================
 
-        @Test
-        @DisplayName("Unhappy Path: Falla si se intenta actualizar dejando el curso en null")
-        void actualizarGrupo_CursoNulo_LanzaRecursoNoEncontradoException() {
-            Grupo grupo = Grupo.crear(cursoMock, maestroMock, aulaMock, "2026-1");
+    @Test
+    @DisplayName("actualizar: debe modificar todos los campos correctamente")
+    void actualizar_conDatosValidos_debeActualizarCampos() {
+        Grupo grupo = Grupo.crear(curso, maestro, aula, "2024-1");
 
-            assertThrows(RecursoNoEncontradoException.class, () ->
-                    grupo.actualizar(null, maestroMock, aulaMock, "2026-2")
-            );
+        Curso nuevoCurso = mock(Curso.class);
+        Maestro nuevoMaestro = mock(Maestro.class);
+        Aula nuevaAula = mock(Aula.class);
+        String nuevoPeriodo = "2024-2";
 
-            // Confirma la integridad del estado anterior
-            assertEquals(cursoMock, grupo.getCurso());
-            assertEquals("2026-1", grupo.getPeriodo());
-        }
+        grupo.actualizar(nuevoCurso, nuevoMaestro, nuevaAula, nuevoPeriodo);
+
+        assertEquals(nuevoCurso, grupo.getCurso());
+        assertEquals(nuevoMaestro, grupo.getMaestro());
+        assertEquals(nuevaAula, grupo.getAula());
+        assertEquals(nuevoPeriodo, grupo.getPeriodo());
+    }
+
+    // ============================================================
+    // UNHAPPY PATHS - crear()
+    // ============================================================
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el curso es null")
+    void crear_conCursoNull_debeLanzarExcepcion() {
+        RecursoNoEncontradoException ex = assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> Grupo.crear(null, maestro, aula, periodoValido)
+        );
+        assertEquals("El curso es requerido", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("crear: debe lanzar excepción si el periodo está vacío")
+    void crear_conPeriodoVacio_debeLanzarExcepcion() {
+        DatoInvalidoException ex = assertThrows(
+                DatoInvalidoException.class,
+                () -> Grupo.crear(curso, maestro, aula, "")
+        );
+        assertTrue(ex.getMessage().contains("El periodo es requerido"));
+    }
+
+    // ============================================================
+    // UNHAPPY PATHS - actualizar()
+    // ============================================================
+
+    @Test
+    @DisplayName("actualizar: debe lanzar excepción si el maestro es null")
+    void actualizar_conMaestroNull_debeLanzarExcepcion() {
+        Grupo grupo = Grupo.crear(curso, maestro, aula, periodoValido);
+
+        RecursoNoEncontradoException ex = assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> grupo.actualizar(curso, null, aula, "2024-2")
+        );
+        assertEquals("El maestro es requerido", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("actualizar: debe lanzar excepción si el periodo excede los 20 caracteres")
+    void actualizar_conPeriodoDemasiadoLargo_debeLanzarExcepcion() {
+        Grupo grupo = Grupo.crear(curso, maestro, aula, periodoValido);
+
+        String periodoLargo = "123456789012345678901"; // 21 chars
+
+        assertThrows(
+                DatoInvalidoException.class,
+                () -> grupo.actualizar(curso, maestro, aula, periodoLargo)
+        );
     }
 }

@@ -1,8 +1,6 @@
 package com.eduardo.escuela.dto.calificaciones;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-
 import com.eduardo.escuela.dto.datos.DatosInscripcion;
 
 import io.swagger.v3.oas.annotations.media.Schema;

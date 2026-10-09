@@ -22,7 +22,7 @@ public enum DiaSemana {
     public static DiaSemana obtenerPorDescripcion(String descripcion) {
         StringCustomUtils.validarNoVacio(descripcion, "El día es requerido");
 
-        String normalizada = StringCustomUtils.normalizarTexto(descripcion);
+        String normalizada = StringCustomUtils.normalizarTexto(descripcion.trim());
 
         for (DiaSemana dia : values()) {
             if (StringCustomUtils.normalizarTexto(dia.descripcion).equalsIgnoreCase(normalizada))

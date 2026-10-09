@@ -26,7 +26,7 @@ public record GrupoRequest(
     @Schema(description = "Periodo del grupo", example = "2026-01")
     @NotBlank(message = "El periodo es requerido")
     @Pattern(
-        regexp = "^\\d{4}-(0[1-9]|1[0-9])$", 
+        regexp = "^\\d{4}-(0[1-9]|1[0-2])$",
         message = "El período debe tener el formato AAAA-PP (ej. 2026-01)"
     )
     String periodo
